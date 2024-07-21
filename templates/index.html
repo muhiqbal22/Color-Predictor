@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Predictor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Color Predictor</h1>
+
+        <!-- Form untuk memprediksi kode warna dan RGB dari nama warna -->
+        <form id="predictForm">
+            <label for="color_name">Enter Color Name:</label>
+            <input type="text" id="color_name" name="color_name" list="color_names" autocomplete="off">
+            <datalist id="color_names">
+                {% for name in color_names %}
+                <option value="{{ name }}">
+                {% endfor %}
+            </datalist>
+            <button type="submit">Predict Color Code and RGB</button>
+        </form>
+
+        <!-- Hasil prediksi -->
+        <div id="predictionResult">
+            <h2>Result:</h2>
+            <p id="resultColorName"></p>
+            <p id="resultColorCode"></p>
+            <p id="resultRGB"></p>
+        </div>
+    </div>
+
+    <!-- Script JavaScript untuk melakukan prediksi -->
+    <script>
+        document.getElementById('predictForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var colorName = document.getElementById('color_name').value;
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'color_name=' + encodeURIComponent(colorName)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('resultColorName').textContent = 'Error: ' + data.error;
+                } else {
+                    document.getElementById('resultColorName').textContent = 'Color Name: ' + colorName;
+                    document.getElementById('resultColorCode').textContent = 'Color Code: ' + data.color_code;
+                    document.getElementById('resultRGB').textContent = 'RGB: R: ' + data.rgb.r + ', G: ' + data.rgb.g + ', B: ' + data.rgb.b;
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
